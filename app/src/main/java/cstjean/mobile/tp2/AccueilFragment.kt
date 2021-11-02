@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.google.android.gms.location.*
 import java.util.concurrent.TimeUnit
 
@@ -71,19 +72,6 @@ class AccueilFragment : Fragment() {
         fusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this.requireActivity())
 
-        locationRequest = LocationRequest.create().apply {
-            interval = TimeUnit.SECONDS.toMillis(10)
-            fastestInterval = TimeUnit.SECONDS.toMillis(5)
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
-                locationResult ?: return
-                showLocation(locationResult.lastLocation)
-            }
-        }
-
         btnDemarrer.setOnClickListener {
             when {
                 ContextCompat.checkSelfPermission(this.requireContext(),
@@ -96,7 +84,10 @@ class AccueilFragment : Fragment() {
                 {
                     if (!requestingLocationUpdates) {
                         requestingLocationUpdates = true
-                        startLocationUpdates()
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.accueil, RallyFragment(), "fragmentRally")
+                            .addToBackStack(null)
+                            .commit()
                     }
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
@@ -110,53 +101,6 @@ class AccueilFragment : Fragment() {
             }
         }
         return view
-    }
-
-    private fun showLastLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                this.requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this.requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) return
-
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                Log.d("track", location.toText())
-            }
-    }
-
-    private fun startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(
-                this.requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this.requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) return
-        Log.d("track", "START")
-        fusedLocationClient.requestLocationUpdates(locationRequest,
-            locationCallback,
-            Looper.getMainLooper())
-    }
-
-    private fun showLocation(location: Location?) {
-        Log.d("track", location.toText())
-    }
-    override fun onResume() {
-        super.onResume()
-        if (requestingLocationUpdates) startLocationUpdates()
-    }
-    override fun onPause() {
-        super.onPause()
-        stopLocationUpdates()
-    }
-    private fun stopLocationUpdates() {
-        Log.d("track", "STOP")
-        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
