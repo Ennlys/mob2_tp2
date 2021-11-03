@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
@@ -105,14 +106,20 @@ class RallyFragment : Fragment(), OnMapReadyCallback {
         )
 
         for (position in mutableList) {
+            val latLng = LatLng(position.latitude, position.longitude)
             if (position.visite) {
-                // TODO
+                googleMap.addMarker(
+                    MarkerOptions().position(latLng)
+                        .title("visité")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                )
             }
             else {
-                val latLng = LatLng(position.latitude, position.longitude)
+
                 googleMap.addMarker(
                     MarkerOptions().position(latLng)
                         .title("non visite")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
                 )
 
                 googleMap.addCircle(
