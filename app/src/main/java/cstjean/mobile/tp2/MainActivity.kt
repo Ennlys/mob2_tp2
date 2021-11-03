@@ -20,8 +20,8 @@ class MainActivity : AppCompatActivity(), ActionHandler {
     }
 
     override fun handleAction(actionCode: String) {
-        when {
-            actionCode == AccueilFragment.FRAGMENT_RALLYFRAGMENT_OPEN -> {
+        when (actionCode) {
+            AccueilFragment.FRAGMENT_RALLYFRAGMENT_OPEN -> {
                 val fragment = RallyFragment()
                 supportFragmentManager
                     .beginTransaction()
