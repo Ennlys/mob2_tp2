@@ -13,10 +13,12 @@ import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.gms.location.*
 import java.util.concurrent.TimeUnit
+import androidx.fragment.app.setFragmentResult
 
 private const val REQUESTING_LOCATION_UPDATES_KEY = "REQUESTING_LOCATION_UPDATES_KEY"
 
@@ -56,6 +58,7 @@ class AccueilFragment : Fragment() {
             }
         }
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -84,10 +87,7 @@ class AccueilFragment : Fragment() {
                 {
                     if (!requestingLocationUpdates) {
                         requestingLocationUpdates = true
-                        requireActivity().supportFragmentManager.beginTransaction()
-                            .replace(R.id.accueil, RallyFragment(), "fragmentRally")
-                            .addToBackStack(null)
-                            .commit()
+                        (activity as ActionHandler).handleAction(FRAGMENT_RALLYFRAGMENT_OPEN)
                     }
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
@@ -106,5 +106,10 @@ class AccueilFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY, requestingLocationUpdates)
         super.onSaveInstanceState(outState)
+    }
+
+    companion object {
+        const val FRAGMENT_RALLYFRAGMENT_OPEN = "fragment_rallyfragment_open"
+        const val FRAGMENT_RALLYFRAGMENT_CLOSED = "fragment_rallyfragment_closed"
     }
 }
