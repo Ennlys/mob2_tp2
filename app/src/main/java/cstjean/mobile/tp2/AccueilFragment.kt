@@ -20,8 +20,6 @@ import com.google.android.gms.location.*
 import java.util.concurrent.TimeUnit
 import androidx.fragment.app.setFragmentResult
 
-private const val REQUESTING_LOCATION_UPDATES_KEY = "REQUESTING_LOCATION_UPDATES_KEY"
-
 /**
  *
  * @author Joseph Duquet
@@ -30,11 +28,6 @@ private const val REQUESTING_LOCATION_UPDATES_KEY = "REQUESTING_LOCATION_UPDATES
 class AccueilFragment : Fragment() {
 
     private lateinit var btnDemarrer: Button
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationRequest: LocationRequest
-    private lateinit var locationCallback: LocationCallback
-
-    private var requestingLocationUpdates = false
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -43,11 +36,9 @@ class AccueilFragment : Fragment() {
             when {
                 permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
                     Log.d("track", "isGranted - FINE")
-                    requestingLocationUpdates = true
                 }
                 permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
                     Log.d("track", "isGranted - COARSE")
-                    requestingLocationUpdates = true
                 }
                 else -> {
                     // TODO
@@ -66,14 +57,7 @@ class AccueilFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_accueil, container, false)
 
-        if (savedInstanceState != null) {
-            requestingLocationUpdates = savedInstanceState.getBoolean(REQUESTING_LOCATION_UPDATES_KEY, false)
-        }
-
         btnDemarrer = view.findViewById(R.id.btn_demmarer)
-
-        fusedLocationClient =
-            LocationServices.getFusedLocationProviderClient(this.requireActivity())
 
         btnDemarrer.setOnClickListener {
             when {
@@ -85,10 +69,9 @@ class AccueilFragment : Fragment() {
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED ->
                 {
-                    if (!requestingLocationUpdates) {
-                        requestingLocationUpdates = true
-                        (activity as ActionHandler).handleAction(FRAGMENT_RALLYFRAGMENT_OPEN)
-                    }
+                    requireActivity().supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, RallyFragment())
+                        .commit()
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                     // TODO expliquer pourquoi necessaire
@@ -101,11 +84,6 @@ class AccueilFragment : Fragment() {
             }
         }
         return view
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY, requestingLocationUpdates)
-        super.onSaveInstanceState(outState)
     }
 
     companion object {
