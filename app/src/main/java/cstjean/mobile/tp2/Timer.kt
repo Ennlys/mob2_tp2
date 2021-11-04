@@ -7,29 +7,18 @@ import android.widget.TextView
 
 /**
  * Permet de calculer le temps dans un thread à part
- * @param view Nécessaire pour mettre à jour le widget
+ * @param activity Nécessaire pour mettre à jour le widget
  * @param widget Le id du widget (textView) qui affichera le temps
  */
-class Timer(view: View, widget: Int) : Runnable {
+class Timer() : Runnable {
     private var time = 0L
     private var handler: Handler? = null
-    private var view: View? = null
-    private var widget: Int = 0
-
-    /**
-     * Constructeur publique
-     */
-    init {
-        this.view = view
-        this.widget = widget
-    }
 
     /**
      * Démarre le chronomètre
      */
-    fun startTimer(){
+    fun startTimer() {
         handler = Handler(Looper.getMainLooper())
-        run()
     }
 
     /**
@@ -44,6 +33,10 @@ class Timer(view: View, widget: Int) : Runnable {
      */
     fun stopTimer(){
         handler?.removeCallbacks(this)
+    }
+
+    fun getTime(): String{
+        return getFormattedStopWatch()
     }
 
     /**
@@ -68,7 +61,6 @@ class Timer(view: View, widget: Int) : Runnable {
      */
     override fun run() {
         time += 1
-        view?.findViewById<TextView>(widget)?.text = getFormattedStopWatch()
         handler?.postDelayed(this, 1000L)
     }
 }

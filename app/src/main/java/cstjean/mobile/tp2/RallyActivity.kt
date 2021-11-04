@@ -11,6 +11,7 @@ import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -27,7 +28,6 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var currentLocation: Location
     private var requestingLocationUpdates = false
     private lateinit var googleMap: GoogleMap
-    private lateinit var mapView: MapView
     private var stepCounter = 0
 
     private val mutableList = arrayOf(
@@ -38,9 +38,11 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
-        mapView = findViewById(R.id.GM)
-        mapView.onCreate(savedInstanceState)
-        mapView.onResume()
+        setContentView(R.layout.fragment_rally)
+
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.GM) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
         val sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
@@ -52,9 +54,20 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         sensor?.also {
             sensorManager.requestTriggerSensor(triggerEventListener, it)
         }
-
-        val timer = Timer(this.currentFocus!!, R.id.timer)
+        val timer = Timer()
         timer.startTimer()
+
+        Thread(Runnable {
+            while(true){
+                runOnUiThread{
+                    findViewById<TextView>(R.id.timer).text = timer.getTime()
+                }
+                Thread.sleep(1000)
+            }
+        }).start()
+        //Thread.sleep(1000)
+        //Log.d("Test", timer.getTime())
+        //findViewById<TextView>(R.id.timer).text = timer.getTime()
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
@@ -70,10 +83,6 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        mapView.getMapAsync(OnMapReadyCallback {
-            this.googleMap = it
-            startLocationUpdates()
-        })
     }
 
     private fun startLocationUpdates() {

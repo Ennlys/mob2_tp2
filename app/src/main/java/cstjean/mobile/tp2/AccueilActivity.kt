@@ -1,6 +1,7 @@
 package cstjean.mobile.tp2
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -50,7 +51,8 @@ class AccueilActivity : AppCompatActivity() {
                             Manifest.permission.ACCESS_COARSE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED ->
                 {
-                    //A la permission
+                    val intent = Intent(this, RallyActivity::class.java)
+                    startActivity(intent)
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                     // TODO expliquer pourquoi necessaire
