@@ -14,6 +14,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.CancellationToken
@@ -29,6 +31,12 @@ class RallyFragment : Fragment(), OnMapReadyCallback {
     private var requestingLocationUpdates = false
     private lateinit var googleMap: GoogleMap
     private lateinit var mapView: MapView
+
+    private val mutableList = arrayOf(
+        Coordonees(45.3031,-73.2658),
+        Coordonees(45.3013,-73.2577),
+        Coordonees(45.2944,-73.2577),
+        Coordonees(45.2956,-73.2670))
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -96,9 +104,34 @@ class RallyFragment : Fragment(), OnMapReadyCallback {
                 .position(LatLng(currentLocation.latitude, currentLocation.longitude))
                 .title("Toi")
         )
+
+        for (position in mutableList) {
+            val latLng = LatLng(position.latitude, position.longitude)
+            if (position.visite) {
+                googleMap.addMarker(
+                    MarkerOptions().position(latLng)
+                        .title("visité")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                )
+            }
+            else {
+
+                googleMap.addMarker(
+                    MarkerOptions().position(latLng)
+                        .title("non visite")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                )
+
+                googleMap.addCircle(
+                    CircleOptions().center(latLng).radius(100.0)
+                )
+            }
+        }
+
         if(marker != null) googleMap.moveCamera(CameraUpdateFactory.newLatLng(marker.position))
-        googleMap.setMinZoomPreference(15F)
+        googleMap.setMinZoomPreference(14F)
     }
+
 
     private fun stopLocationUpdates() {
         Log.d("track", "STOP")
