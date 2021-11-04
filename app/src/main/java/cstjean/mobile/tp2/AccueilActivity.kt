@@ -2,30 +2,14 @@ package cstjean.mobile.tp2
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Location
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import com.google.android.gms.location.*
-import java.util.concurrent.TimeUnit
-import androidx.fragment.app.setFragmentResult
 
-/**
- *
- * @author Joseph Duquet
- * @author Ennlys Granger-Corbeil
- */
-class AccueilFragment : Fragment() {
+class AccueilActivity : AppCompatActivity() {
 
     private lateinit var btnDemarrer: Button
 
@@ -50,28 +34,23 @@ class AccueilFragment : Fragment() {
         }
 
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_accueil, container, false)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.fragment_accueil)
 
-        btnDemarrer = view.findViewById(R.id.btn_demmarer)
+        btnDemarrer = findViewById(R.id.btn_demmarer)
 
         btnDemarrer.setOnClickListener {
             when {
-                ContextCompat.checkSelfPermission(this.requireContext(),
+                ContextCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    this.requireContext(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED ->
+                        ContextCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED ->
                 {
-                    requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, RallyFragment())
-                        .commit()
+                    //A la permission
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                     // TODO expliquer pourquoi necessaire
@@ -83,7 +62,6 @@ class AccueilFragment : Fragment() {
                 }
             }
         }
-        return view
     }
 
     companion object {

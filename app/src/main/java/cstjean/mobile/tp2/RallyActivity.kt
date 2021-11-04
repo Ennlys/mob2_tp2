@@ -1,29 +1,26 @@
 package cstjean.mobile.tp2
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorManager
+import android.hardware.TriggerEvent
+import android.hardware.TriggerEventListener
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CircleOptions
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.CancellationToken
-import java.security.Permission
+import com.google.android.gms.maps.model.*
 
 private const val REQUESTING_LOCATION_UPDATES_KEY = "REQUESTING_LOCATION_UPDATES_KEY"
 
-class RallyFragment : Fragment(), OnMapReadyCallback {
+class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
@@ -31,6 +28,7 @@ class RallyFragment : Fragment(), OnMapReadyCallback {
     private var requestingLocationUpdates = false
     private lateinit var googleMap: GoogleMap
     private lateinit var mapView: MapView
+    private var stepCounter = 0
 
     private val mutableList = arrayOf(
         Coordonees(45.3031,-73.2658),
@@ -38,18 +36,24 @@ class RallyFragment : Fragment(), OnMapReadyCallback {
         Coordonees(45.2944,-73.2577),
         Coordonees(45.2956,-73.2670))
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_rally, container, false)
-        mapView = view.findViewById(R.id.GM)
+    override fun onCreate(savedInstanceState: Bundle?){
+        super.onCreate(savedInstanceState)
+        mapView = findViewById(R.id.GM)
         mapView.onCreate(savedInstanceState)
         mapView.onResume()
 
+        val sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        val triggerEventListener = object : TriggerEventListener() {
+            override fun onTrigger(event: TriggerEvent?) {
+                stepCounter++
+            }
+        }
+        sensor?.also {
+            sensorManager.requestTriggerSensor(triggerEventListener, it)
+        }
 
-        val timer = Timer(view, R.id.timer)
+        val timer = Timer(this.currentFocus!!, R.id.timer)
         timer.startTimer()
 
         locationCallback = object : LocationCallback() {
@@ -65,21 +69,19 @@ class RallyFragment : Fragment(), OnMapReadyCallback {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         mapView.getMapAsync(OnMapReadyCallback {
             this.googleMap = it
             startLocationUpdates()
         })
-
-        return view
     }
 
     private fun startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(
-                this.requireContext(),
+                this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this.requireContext(),
+                this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
@@ -96,6 +98,7 @@ class RallyFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun showLocation(location: Location?){
+        Log.d("Steps", stepCounter.toString())
         if(location != null) currentLocation = location
         else Log.d("track", "No location provided")
         googleMap.clear()
@@ -135,11 +138,9 @@ class RallyFragment : Fragment(), OnMapReadyCallback {
 
     private fun stopLocationUpdates() {
         Log.d("track", "STOP")
-        if(ActivityCompat.checkSelfPermission(
-                requireContext(),
+        if(ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                requireContext(),
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
             ){
@@ -154,10 +155,10 @@ class RallyFragment : Fragment(), OnMapReadyCallback {
         super.onStart()
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
-                this.requireContext(),
+                this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ), ContextCompat.checkSelfPermission(
-                this.requireContext(),
+                this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) -> {
                 if (!requestingLocationUpdates){
