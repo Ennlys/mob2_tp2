@@ -28,6 +28,8 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var currentLocation: Location
     private var requestingLocationUpdates = false
     private lateinit var googleMap: GoogleMap
+    private var time = 0L
+    private lateinit var tvTimer: TextView
     private var stepCounter = 0
 
     private val mutableList = arrayOf(
@@ -39,6 +41,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_rally)
+        tvTimer = findViewById(R.id.timer)
 
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.GM) as SupportMapFragment
@@ -54,20 +57,6 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         sensor?.also {
             sensorManager.requestTriggerSensor(triggerEventListener, it)
         }
-        val timer = Timer()
-        timer.startTimer()
-
-        Thread(Runnable {
-            while(true){
-                runOnUiThread{
-                    findViewById<TextView>(R.id.timer).text = timer.getTime()
-                }
-                Thread.sleep(1000)
-            }
-        }).start()
-        //Thread.sleep(1000)
-        //Log.d("Test", timer.getTime())
-        //findViewById<TextView>(R.id.timer).text = timer.getTime()
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
@@ -83,6 +72,31 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        Thread(Runnable {
+            while(true){
+                runOnUiThread { tvTimer.text = getFormattedStopWatch(time) }
+                runOnUiThread { time++ }
+                Thread.sleep(1000)
+            }
+        }).start()
+    }
+
+    /**
+     * Transforme la donnée du temps en une string hh:mm:ss
+     */
+    //Source: https://medium.com/swlh/how-to-create-a-stopwatch-in-android-117912264491
+    private fun getFormattedStopWatch(time: Long): String {
+        var milliseconds = time * 1000
+        val hours = java.util.concurrent.TimeUnit.MILLISECONDS.toHours(milliseconds)
+        milliseconds -= java.util.concurrent.TimeUnit.HOURS.toMillis(hours)
+        val minutes = java.util.concurrent.TimeUnit.MILLISECONDS.toMinutes(milliseconds)
+        milliseconds -= java.util.concurrent.TimeUnit.MINUTES.toMillis(minutes)
+        val seconds = java.util.concurrent.TimeUnit.MILLISECONDS.toSeconds(milliseconds)
+
+        return "${if (hours < 10) "0" else ""}$hours:" +
+                "${if (minutes < 10) "0" else ""}$minutes:" +
+                "${if (seconds < 10) "0" else ""}$seconds"
     }
 
     private fun startLocationUpdates() {
