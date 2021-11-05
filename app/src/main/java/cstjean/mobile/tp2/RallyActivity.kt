@@ -36,6 +36,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var tvTimer: TextView
     private var stepCounter = 0
     private var measureTime = true
+    private lateinit var tvStepcounter: TextView
 
     private val mutableList = arrayOf(
         Coordonees(45.3031,-73.2658),
@@ -47,6 +48,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_rally)
 
+        tvStepcounter = findViewById(R.id.steps)
         tvTimer = findViewById(R.id.timer)
 
         val mapFragment = supportFragmentManager
@@ -58,6 +60,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         val triggerEventListener = object : TriggerEventListener() {
             override fun onTrigger(event: TriggerEvent?) {
                 stepCounter++
+                tvStepcounter.text = getString(R.string.tv_stepCounter, stepCounter)
             }
         }
 

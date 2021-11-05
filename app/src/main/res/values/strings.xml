@@ -2,4 +2,6 @@
     <string name="app_name">TP2</string>
     <string name="btn_demmarerRally">demmarer</string>
     <string name="tps_course_rally">Temps de course du rally</string>
+    <string name="step_counter">Compteur de pas</string>
+    <string name="tv_stepCounter">Steps: %1$o</string>
 </resources>
