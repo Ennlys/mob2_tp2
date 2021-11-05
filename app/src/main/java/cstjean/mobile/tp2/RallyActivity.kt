@@ -18,6 +18,10 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 private const val REQUESTING_LOCATION_UPDATES_KEY = "REQUESTING_LOCATION_UPDATES_KEY"
 
@@ -42,6 +46,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_rally)
+
         tvTimer = findViewById(R.id.timer)
 
         val mapFragment = supportFragmentManager
@@ -55,6 +60,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
                 stepCounter++
             }
         }
+
         sensor?.also {
             sensorManager.requestTriggerSensor(triggerEventListener, it)
         }
@@ -74,7 +80,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        Thread {
+        val timer = Thread {
             while (measureTime) {
                 runOnUiThread { tvTimer.text = getFormattedStopWatch(time) }
                 runOnUiThread { time++ }
@@ -83,12 +89,16 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         }.start()
     }
 
-    private fun resumeTimer(){
-        measureTime = true
+    private fun resumeTimer(timer: Thread){
+        if(timer.isAlive){
+            measureTime = true
+        }
     }
 
-    private fun pauseTimer(){
-        measureTime = false
+    private fun pauseTimer(timer: Thread){
+        if(timer.isAlive){
+            measureTime = false
+        }
     }
 
     /**
@@ -150,7 +160,6 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
                 )
             }
             else {
-
                 googleMap.addMarker(
                     MarkerOptions().position(latLng)
                         .title("non visite")
@@ -161,12 +170,32 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
                     CircleOptions().center(latLng).radius(100.0)
                 )
             }
+            if(getDistanceFromLatLonInM(currentLocation, position) <= 100){
+                position.visite = true
+            }
         }
 
         if(marker != null) googleMap.moveCamera(CameraUpdateFactory.newLatLng(marker.position))
-        googleMap.setMinZoomPreference(14F)
+        googleMap.setMinZoomPreference(16F)
     }
 
+    //Source: https://stackoverflow.com/questions/18883601/function-to-calculate-distance-between-two-coordinates
+    //Avec quelques modifications pour nos besoins
+    private fun getDistanceFromLatLonInM(userLocation: Location, objectiveLocation: Coordonees): Double {
+        val earthRadius = 6371; // Radius of the earth in km
+        val dLat = degToRad(objectiveLocation.latitude - userLocation.latitude)  // deg2rad below
+        val dLon = degToRad(objectiveLocation.longitude - userLocation.longitude)
+        val a =
+            sin(dLat / 2) * sin(dLat / 2) + cos(degToRad(userLocation.latitude)) * cos(degToRad(objectiveLocation.latitude)) *
+                    sin(dLon / 2) * sin(dLon / 2)
+
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return earthRadius * c * 1000 // Distance in m
+    }
+
+    private fun degToRad(deg: Double): Double {
+        return deg * (Math.PI/180)
+    }
 
     private fun stopLocationUpdates() {
         Log.d("track", "STOP")
@@ -214,6 +243,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
+        this.googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
     }
 
 }
