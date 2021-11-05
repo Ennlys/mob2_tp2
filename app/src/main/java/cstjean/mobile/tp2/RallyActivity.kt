@@ -31,6 +31,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private var time = 0L
     private lateinit var tvTimer: TextView
     private var stepCounter = 0
+    private var measureTime = true
 
     private val mutableList = arrayOf(
         Coordonees(45.3031,-73.2658),
@@ -73,13 +74,21 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        Thread(Runnable {
-            while(true){
+        Thread {
+            while (measureTime) {
                 runOnUiThread { tvTimer.text = getFormattedStopWatch(time) }
                 runOnUiThread { time++ }
                 Thread.sleep(1000)
             }
-        }).start()
+        }.start()
+    }
+
+    private fun resumeTimer(){
+        measureTime = true
+    }
+
+    private fun pauseTimer(){
+        measureTime = false
     }
 
     /**
@@ -186,10 +195,21 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
             ) -> {
                 if (!requestingLocationUpdates){
                     requestingLocationUpdates = true
+                    startLocationUpdates()
                 }
             }
 
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if(requestingLocationUpdates) startLocationUpdates()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        stopLocationUpdates()
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
