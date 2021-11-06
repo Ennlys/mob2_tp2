@@ -20,7 +20,6 @@ import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import java.lang.Integer.parseInt
-import java.lang.Long.parseLong
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -164,7 +163,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         if(location != null) currentLocation = location
         else Log.d("track", "No location provided")
         googleMap.clear()
-        val marker = googleMap.addMarker(
+        googleMap.addMarker(
             MarkerOptions()
                 .position(LatLng(currentLocation.latitude, currentLocation.longitude))
                 .title("Toi")
