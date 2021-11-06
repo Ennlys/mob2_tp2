@@ -65,9 +65,4 @@ class AccueilActivity : AppCompatActivity() {
             }
         }
     }
-
-    companion object {
-        const val FRAGMENT_RALLYFRAGMENT_OPEN = "fragment_rallyfragment_open"
-        const val FRAGMENT_RALLYFRAGMENT_CLOSED = "fragment_rallyfragment_closed"
-    }
 }

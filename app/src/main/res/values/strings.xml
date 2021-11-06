@@ -4,6 +4,7 @@
     <string name="tps_course_rally">Temps de course du rally</string>
     <string name="step_counter">Compteur de pas</string>
     <string name="tv_stepCounter">Steps: %1$o</string>
-    <string name="congrats">Bravo! Vous avez atteint tous les objectifs en %1$s avec %2$o pas!</string>
+    <!--LINT: Pas besoin de formatter en cas de pluriel-->
+    <string name="congrats">Bravo! Vous avez atteint tous les objectifs en %1$s avec %2$d pas!</string>
     <string name="another_rally">Un autre rally?</string>
 </resources>

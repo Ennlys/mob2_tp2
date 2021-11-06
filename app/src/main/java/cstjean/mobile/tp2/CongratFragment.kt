@@ -2,7 +2,6 @@ package cstjean.mobile.tp2
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
@@ -21,14 +20,13 @@ class CongratFragment: DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val time = requireArguments().getString(time)
         val steps = requireArguments().getInt(steps)
-        val listener = DialogInterface.OnClickListener { _, _ ->
-            startActivity(Intent(requireContext(), RallyActivity::class.java))
-        }
 
         return AlertDialog.Builder(requireActivity())
             .setTitle("Félicitation!")
             .setMessage(getString(R.string.congrats, time, steps))
-            .setPositiveButton(R.string.another_rally, listener)
+            .setPositiveButton(R.string.another_rally) { _, _ ->
+                startActivity(Intent(requireContext(), RallyActivity::class.java))
+            }
             .show()
     }
 
