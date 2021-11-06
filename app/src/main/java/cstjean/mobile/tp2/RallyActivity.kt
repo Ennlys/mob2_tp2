@@ -34,7 +34,6 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var googleMap: GoogleMap
     private var time = 0L
     private lateinit var tvTimer: TextView
-    private var stepCounter = 0
     private var measureTime = true
     private lateinit var tvStepcounter: TextView
 
@@ -59,8 +58,9 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         val triggerEventListener = object : TriggerEventListener() {
             override fun onTrigger(event: TriggerEvent?) {
-                stepCounter++
-                tvStepcounter.text = getString(R.string.tv_stepCounter, stepCounter)
+                if (event != null) {
+                    tvStepcounter.text = getString(R.string.tv_stepCounter, event.values[0])
+                }
             }
         }
 
@@ -143,7 +143,6 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun showLocation(location: Location?){
-        Log.d("Steps", stepCounter.toString())
         if(location != null) currentLocation = location
         else Log.d("track", "No location provided")
         googleMap.clear()
