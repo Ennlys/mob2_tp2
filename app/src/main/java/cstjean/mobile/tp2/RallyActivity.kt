@@ -2,6 +2,7 @@ package cstjean.mobile.tp2
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
@@ -18,6 +19,8 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
+import java.lang.Integer.parseInt
+import java.lang.Long.parseLong
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -36,11 +39,13 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var tvStepcounter: TextView
     private var bool: AtomicBoolean = AtomicBoolean(true)
     private var areVisited = 0
+    private var congrats = false
+    private var showUserLocation = true
 
-    private val mutableList = arrayOf(
+    private val mutableList = arrayOf(/*
         Coordonees(45.3031,-73.2658),
         Coordonees(45.3013,-73.2577),
-        Coordonees(45.2944,-73.2577),
+        */Coordonees(45.2944,-73.2577),
         Coordonees(45.2956,-73.2670))
 
     override fun onCreate(savedInstanceState: Bundle?){
@@ -71,6 +76,10 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
+                if (showUserLocation){
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(fromLocationToLatLng(locationResult.lastLocation)))
+                    showUserLocation = false
+                }
                 showLocation(locationResult.lastLocation)
             }
         }
@@ -90,6 +99,10 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
                 Thread.sleep(1000)
             }
         }.start()
+    }
+
+    private fun fromLocationToLatLng(location: Location): LatLng {
+        return LatLng(location.latitude, location.longitude)
     }
 
     private fun resumeTimer(){
@@ -139,6 +152,14 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         stopLocationUpdates()
     }
 
+    private fun getAllVisited(): Int{
+        var retour = 0
+        for(coordonnee in mutableList){
+            retour += when (coordonnee.visite) { true -> 1 else -> 0}
+        }
+        return retour
+    }
+
     private fun showLocation(location: Location?){
         if(location != null) currentLocation = location
         else Log.d("track", "No location provided")
@@ -171,15 +192,29 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             if(getDistanceFromLatLonInM(currentLocation, position) <= 100){
                 position.visite = true
-                areVisited++
-            }
-            if(areVisited >= mutableList.size){
-                //Tous les objectifs sont atteints, donc le rally est terminé
+                areVisited = getAllVisited()
             }
         }
+        if(areVisited == mutableList.size && !congrats){
+            congrats = true
+            onPause()
 
-        if(marker != null) googleMap.moveCamera(CameraUpdateFactory.newLatLng(marker.position))
-        googleMap.setMinZoomPreference(16F)
+            val intent = Intent()
+            intent.putExtra(CongratFragment.steps, tvStepcounter.text)
+            intent.putExtra(CongratFragment.time, tvTimer.text)
+
+            val ft = supportFragmentManager.beginTransaction()
+            val prev = supportFragmentManager.findFragmentByTag(CongratFragment.TAG)
+
+            if(prev != null) ft.remove(prev)
+            ft.addToBackStack(null)
+
+            val congratFragment = CongratFragment().newInstance(tvTimer.text.toString(), parseInt("${if (tvStepcounter.text.toString() == "") 0 else tvStepcounter.text.toString()}"))
+            congratFragment.show(ft, CongratFragment.TAG)
+            return
+        }
+
+        googleMap.setMinZoomPreference(14F)
     }
 
     //Source: https://stackoverflow.com/questions/18883601/function-to-calculate-distance-between-two-coordinates
@@ -249,5 +284,4 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         this.googleMap = googleMap
         this.googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
     }
-
 }
