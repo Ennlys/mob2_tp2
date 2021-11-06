@@ -18,12 +18,11 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
-
-private const val REQUESTING_LOCATION_UPDATES_KEY = "REQUESTING_LOCATION_UPDATES_KEY"
 
 class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -34,8 +33,9 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var googleMap: GoogleMap
     private var time = 0L
     private lateinit var tvTimer: TextView
-    private var measureTime = true
     private lateinit var tvStepcounter: TextView
+    private var bool: AtomicBoolean = AtomicBoolean(true)
+    private var areVisited = 0
 
     private val mutableList = arrayOf(
         Coordonees(45.3031,-73.2658),
@@ -83,8 +83,8 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        val timer = Thread {
-            while (measureTime) {
+        Thread {
+            while (bool.get()) {
                 runOnUiThread { tvTimer.text = getFormattedStopWatch(time) }
                 runOnUiThread { time++ }
                 Thread.sleep(1000)
@@ -92,16 +92,12 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         }.start()
     }
 
-    private fun resumeTimer(timer: Thread){
-        if(timer.isAlive){
-            measureTime = true
-        }
+    private fun resumeTimer(){
+        bool.set(true)
     }
 
-    private fun pauseTimer(timer: Thread){
-        if(timer.isAlive){
-            measureTime = false
-        }
+    private fun pauseTimer(){
+        bool.set(false)
     }
 
     /**
@@ -139,6 +135,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onPause() {
         super.onPause()
+        pauseTimer()
         stopLocationUpdates()
     }
 
@@ -174,6 +171,10 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             if(getDistanceFromLatLonInM(currentLocation, position) <= 100){
                 position.visite = true
+                areVisited++
+            }
+            if(areVisited >= mutableList.size){
+                //Tous les objectifs sont atteints, donc le rally est terminé
             }
         }
 
@@ -184,8 +185,8 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     //Source: https://stackoverflow.com/questions/18883601/function-to-calculate-distance-between-two-coordinates
     //Avec quelques modifications pour nos besoins
     private fun getDistanceFromLatLonInM(userLocation: Location, objectiveLocation: Coordonees): Double {
-        val earthRadius = 6371; // Radius of the earth in km
-        val dLat = degToRad(objectiveLocation.latitude - userLocation.latitude)  // deg2rad below
+        val earthRadius = 6371 // Radius of the earth in km
+        val dLat = degToRad(objectiveLocation.latitude - userLocation.latitude)  // degToRad below
         val dLon = degToRad(objectiveLocation.longitude - userLocation.longitude)
         val a =
             sin(dLat / 2) * sin(dLat / 2) + cos(degToRad(userLocation.latitude)) * cos(degToRad(objectiveLocation.latitude)) *
@@ -236,6 +237,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onResume() {
         super.onResume()
         if(requestingLocationUpdates) startLocationUpdates()
+        resumeTimer()
     }
 
     override fun onStop() {
