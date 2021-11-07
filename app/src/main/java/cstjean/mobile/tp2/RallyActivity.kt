@@ -42,6 +42,9 @@ import kotlin.math.sqrt
  * @property tvStepcounter le textview du Step counter
  * @property activeThread booléene qui active ou désactive le thread dépendant de l'application
  * @property showUserLocation permet d'afficher à l'utilisateur son marqueur
+ * @property sensorManager permet de gérer les différent sensors.
+ * @property sensor le sensor pour le step encounter
+ * @property stepCmptMax permet de prendre la valeur du step counter que le OS recoit.
  * @property listCoordonees la liste des coordonées du rally
  *
  * @author Joseph Duquet
@@ -58,8 +61,6 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
     private var time = 0L
     private lateinit var tvTimer: TextView
     private lateinit var tvStepcounter: TextView
-
-
     private var activeThread: AtomicBoolean = AtomicBoolean(true)
     private var showUserLocation = true
 
@@ -377,7 +378,10 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
     }
 
     /**
+     * au changement du stepCounter, permet de changer le textView
+     * Initialise la valeur de stepCmptMax puisque event.values[0] est une valeur dépendant du OS
      *
+     * @param event l'evenement recu par le sensor
      */
     override fun onSensorChanged(event: SensorEvent) {
         if(stepCmptMax == 0) {
@@ -387,7 +391,7 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
     }
 
     /**
-     *
+     * On l'utilise pas pour ce programme, mais nécessaire pour l'interface sensorEventListener
      */
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
         // TODO rien en ce moment
