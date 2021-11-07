@@ -62,9 +62,9 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private var showUserLocation = true
 
     private val listCoordonees = arrayOf(
-        /*Coordonees(45.3031,-73.2658),
+        Coordonees(45.3031,-73.2658),
         Coordonees(45.3013,-73.2577),
-        Coordonees(45.2944,-73.2577),*/
+        Coordonees(45.2944,-73.2577),
         Coordonees(45.2956,-73.2670))
 
     /**
@@ -159,7 +159,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * Verifie si la localisation a été accepté auparavant, et pars la localisation.
+     * Vérifie si la localisation a été accepté auparavant, et démarre la localisation.
      */
     private fun startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(
@@ -185,10 +185,11 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
+     * affiche les marqueurs sur la carte google, celle de l'utilisateur
+     * et les objectifs.
+     * Il vérifie si l'utilisateur a tous bien obtenu les objectif et si oui affiche un dialog
      *
-     *
-     *
-     * @param location
+     * @param location la position de l'utilisateur
      */
     private fun showLocation(location: Location?){
 
