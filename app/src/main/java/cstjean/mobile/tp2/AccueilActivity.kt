@@ -64,7 +64,6 @@ class AccueilActivity : AppCompatActivity() {
                     startActivity(Intent(this, RallyActivity::class.java))
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                    //ConvincingFragment().show(supportFragmentManager, ConvincingFragment.TAG)
                     afficheDialogLocalisation()
                 }
                 else -> {
@@ -79,9 +78,8 @@ class AccueilActivity : AppCompatActivity() {
         }
     }
 
-
     /**
-     * Affiche a l'utilisateur un dialog qui explique a l'utilisateur pourquoi on utilisons
+     * Affiche a l'utilisateur un dialog qui explique a l'utilisateur pourquoi on utilise
      * la localisation
      */
     private fun afficheDialogLocalisation() {

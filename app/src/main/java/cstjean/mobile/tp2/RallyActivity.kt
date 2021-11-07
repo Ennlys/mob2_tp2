@@ -1,9 +1,7 @@
 package cstjean.mobile.tp2
 
 import android.Manifest
-import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.*
 import android.location.Location
@@ -14,8 +12,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
-import androidx.fragment.app.setFragmentResult
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
@@ -25,9 +21,6 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
-
-
-
 
 /**
  *
@@ -96,21 +89,6 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
          sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
          sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
-        /*
-        val sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        val triggerEventListener = object : TriggerEventListener() {
-            override fun onTrigger(event: TriggerEvent?) {
-                if (event != null) {
-                    tvStepcounter.text = getString(R.string.tv_stepCounter, event.values[0])
-                }
-            }
-        }
-
-        sensor?.also {
-            sensorManager.requestTriggerSensor(triggerEventListener, it)
-        }
-        */
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
@@ -140,6 +118,7 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
             }
         }.start()
     }
+
     /**
      * permet d'obtenir la localisation est le convertir
 
@@ -243,22 +222,6 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
             activeThread.set(false)
             stopLocationUpdates()
             afficheDialogTermine()
-
-            /*
-            val intent = Intent()
-            intent.putExtra(CongratFragment.steps, tvStepcounter.text)
-            intent.putExtra(CongratFragment.time, tvTimer.text)
-
-            val ft = supportFragmentManager.beginTransaction()
-            val prev = supportFragmentManager.findFragmentByTag(CongratFragment.TAG)
-
-            if(prev != null) ft.remove(prev)
-            ft.addToBackStack(null)
-
-            val congratFragment = CongratFragment().newInstance(tvTimer.text.toString(), parseInt("${if (tvStepcounter.text.toString() == "") 0 else tvStepcounter.text.toString()}"))
-            congratFragment.show(ft, CongratFragment.TAG)
-            return*/
-
         }
         googleMap.setMinZoomPreference(14F)
     }
@@ -267,18 +230,12 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
      * Permet d'afficher a l'utilisateur un dialog de félicitation.
      */
     private fun afficheDialogTermine() {
-        val alertDialogSupprimer = AlertDialog.Builder(this)
-        alertDialogSupprimer.setTitle("Fecilitations!")
-        alertDialogSupprimer.setMessage(getString(
-            R.string.congrats, tvTimer.text, parseInt("" +
-                    "${if (tvStepcounter.text.toString() == "") 0 
-                    else tvStepcounter.text.toString()}")))
+        val ft = supportFragmentManager.beginTransaction()
 
-        alertDialogSupprimer.setPositiveButton(R.string.btn_retourMenu) { _, _ ->
-            finish()
-        }
-        alertDialogSupprimer.setCancelable(false)
-        alertDialogSupprimer.show()
+        ft.addToBackStack(null)
+
+        val congratFragment = CongratFragment().newInstance(tvTimer.text.toString(), parseInt("${if (tvStepcounter.text.toString() == "") 0 else tvStepcounter.text.toString()}"))
+        congratFragment.show(ft, CongratFragment.TAG)
     }
 
     /**
