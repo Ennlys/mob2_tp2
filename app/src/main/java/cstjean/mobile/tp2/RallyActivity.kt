@@ -5,10 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.hardware.Sensor
-import android.hardware.SensorManager
-import android.hardware.TriggerEvent
-import android.hardware.TriggerEventListener
+import android.hardware.*
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
@@ -29,6 +26,9 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+
+
+
 /**
  *
  * @property fusedLocationClient permet la comunication avec l'api du location provider
@@ -47,7 +47,7 @@ import kotlin.math.sqrt
  * @author Joseph Duquet
  * @author Ennlys Granger-Corbeil
  */
-class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
+class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallback {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
@@ -58,8 +58,15 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     private var time = 0L
     private lateinit var tvTimer: TextView
     private lateinit var tvStepcounter: TextView
+
+
     private var activeThread: AtomicBoolean = AtomicBoolean(true)
     private var showUserLocation = true
+
+    private lateinit var sensorManager: SensorManager
+    private var sensor: Sensor? = null
+
+    private var stepCmptMax = 0
 
     private val listCoordonees = arrayOf(
         Coordonees(45.3031,-73.2658),
@@ -85,6 +92,10 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.GM) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+         sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
+        /*
         val sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         val triggerEventListener = object : TriggerEventListener() {
@@ -98,7 +109,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         sensor?.also {
             sensorManager.requestTriggerSensor(triggerEventListener, it)
         }
-
+        */
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
@@ -119,6 +130,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+
         Thread {
             while (activeThread.get()) {
                 runOnUiThread { tvTimer.text = getFormattedStopWatch(time) }
@@ -127,7 +139,6 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }.start()
     }
-
     /**
      * permet d'obtenir la localisation est le convertir
 
@@ -192,7 +203,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
      * @param location la position de l'utilisateur
      */
     private fun showLocation(location: Location?){
-
+        Log.d("test", stepCmptMax.toString())
         if(location != null) currentLocation = location
         else Log.d("track", "No location provided")
         googleMap.clear()
@@ -315,6 +326,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
             ) -> {
                 if (!requestingLocationUpdates){
                     requestingLocationUpdates = true
+
                     startLocationUpdates()
                 }
             }
@@ -329,6 +341,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onPause()
         activeThread.set(false)
         stopLocationUpdates()
+        sensorManager.unregisterListener(this)
     }
 
     /**
@@ -339,6 +352,9 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onResume()
         if(requestingLocationUpdates) startLocationUpdates()
         activeThread.set(true)
+        sensor?.also { proximity ->
+            sensorManager.registerListener(this, proximity, SensorManager.SENSOR_DELAY_NORMAL)
+        }
     }
 
     /**
@@ -346,6 +362,7 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onStop() {
         super.onStop()
+        sensorManager.unregisterListener(this)
         stopLocationUpdates()
     }
 
@@ -357,5 +374,22 @@ class RallyActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
         this.googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+    }
+
+    /**
+     *
+     */
+    override fun onSensorChanged(event: SensorEvent) {
+        if(stepCmptMax == 0) {
+            stepCmptMax = event.values[0].toInt()
+        }
+       tvStepcounter.text = getString(R.string.tv_stepCounter,((event.values[0].toInt() - stepCmptMax)))
+    }
+
+    /**
+     *
+     */
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+        // TODO rien en ce moment
     }
 }
