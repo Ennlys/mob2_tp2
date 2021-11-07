@@ -63,10 +63,11 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
     private var stepCmptMax = 0
 
     private val listCoordonees = arrayOf(
-        Coordonees(45.3031,-73.2658),
-        Coordonees(45.3013,-73.2577),
-        Coordonees(45.2944,-73.2577),
-        Coordonees(45.2956,-73.2670))
+        Coordonees(45.3031, -73.2658),
+        Coordonees(45.3013, -73.2577),
+        Coordonees(45.2944, -73.2577),
+        Coordonees(45.2956, -73.2670)
+    )
 
     /**
      * Permet d'afficher les données correspodant à la vue.
@@ -75,7 +76,7 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
      *
      * @param savedInstanceState l'instance sauvegarder par l'activité.
      */
-    override fun onCreate(savedInstanceState: Bundle?){
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_rally)
 
@@ -86,15 +87,16 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
             .findFragmentById(R.id.GM) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-         sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        sensorManager = this.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
-                if (showUserLocation){
-                    googleMap.moveCamera(CameraUpdateFactory.
-                    newLatLng(fromLocationToLatLng(locationResult.lastLocation)))
+                if (showUserLocation) {
+                    googleMap.moveCamera(
+                        CameraUpdateFactory.newLatLng(fromLocationToLatLng(locationResult.lastLocation))
+                    )
                     showUserLocation = false
                 }
                 showLocation(locationResult.lastLocation)
@@ -163,9 +165,11 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
         ) {
             return
         }
-        fusedLocationClient.requestLocationUpdates(locationRequest,
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
             locationCallback,
-            Looper.getMainLooper())
+            Looper.getMainLooper()
+        )
     }
 
     /**
@@ -182,9 +186,9 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
      *
      * @param location la position de l'utilisateur
      */
-    private fun showLocation(location: Location?){
+    private fun showLocation(location: Location?) {
         Log.d("test", stepCmptMax.toString())
-        if(location != null) currentLocation = location
+        if (location != null) currentLocation = location
         else Log.d("track", "No location provided")
         googleMap.clear()
         googleMap.addMarker(
@@ -201,8 +205,7 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
                         .title("visité")
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                 )
-            }
-            else {
+            } else {
                 googleMap.addMarker(
                     MarkerOptions().position(latLng)
                         .title("non visite")
@@ -213,12 +216,12 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
                     CircleOptions().center(latLng).radius(100.0)
                 )
             }
-            if(getDistanceFromLatLonInM(currentLocation, position) <= 100){
+            if (getDistanceFromLatLonInM(currentLocation, position) <= 100) {
                 position.visite = true
             }
         }
 
-        if(listCoordonees.all { a -> a.visite }){
+        if (listCoordonees.all { a -> a.visite }) {
             activeThread.set(false)
             stopLocationUpdates()
             afficheDialogTermine()
@@ -234,7 +237,10 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
 
         ft.addToBackStack(null)
 
-        val congratFragment = CongratFragment().newInstance(tvTimer.text.toString(), parseInt("${if (tvStepcounter.text.toString() == "") 0 else tvStepcounter.text.toString()}"))
+        val congratFragment = CongratFragment().newInstance(
+            tvTimer.text.toString(),
+            parseInt("${if (tvStepcounter.text.toString() == "") 0 else tvStepcounter.text.toString()}")
+        )
         congratFragment.show(ft, CongratFragment.TAG)
     }
 
@@ -246,12 +252,19 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
      *  @param objectiveLocation l'emplacement de l'objectif
      *  @return la distance entre l'utilisateur et l'emplacement.
      */
-    private fun getDistanceFromLatLonInM(userLocation: Location, objectiveLocation: Coordonees): Double {
+    private fun getDistanceFromLatLonInM(
+        userLocation: Location,
+        objectiveLocation: Coordonees
+    ): Double {
         val earthRadius = 6371 // Radius of the earth in km
         val dLat = degToRad(objectiveLocation.latitude - userLocation.latitude)  // degToRad below
         val dLon = degToRad(objectiveLocation.longitude - userLocation.longitude)
         val a =
-            sin(dLat / 2) * sin(dLat / 2) + cos(degToRad(userLocation.latitude)) * cos(degToRad(objectiveLocation.latitude)) *
+            sin(dLat / 2) * sin(dLat / 2) + cos(degToRad(userLocation.latitude)) * cos(
+                degToRad(
+                    objectiveLocation.latitude
+                )
+            ) *
                     sin(dLon / 2) * sin(dLon / 2)
 
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
@@ -265,7 +278,7 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
      * @return un radian
      */
     private fun degToRad(deg: Double): Double {
-        return deg * (Math.PI/180)
+        return deg * (Math.PI / 180)
     }
 
     /**
@@ -282,7 +295,7 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) -> {
-                if (!requestingLocationUpdates){
+                if (!requestingLocationUpdates) {
                     requestingLocationUpdates = true
 
                     startLocationUpdates()
@@ -308,7 +321,7 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
      */
     override fun onResume() {
         super.onResume()
-        if(requestingLocationUpdates) startLocationUpdates()
+        if (requestingLocationUpdates) startLocationUpdates()
         activeThread.set(true)
         sensor?.also { proximity ->
             sensorManager.registerListener(this, proximity, SensorManager.SENSOR_DELAY_NORMAL)
@@ -341,10 +354,11 @@ class RallyActivity : AppCompatActivity(), SensorEventListener, OnMapReadyCallba
      * @param event l'evenement recu par le sensor
      */
     override fun onSensorChanged(event: SensorEvent) {
-        if(stepCmptMax == 0) {
+        if (stepCmptMax == 0) {
             stepCmptMax = event.values[0].toInt()
         }
-       tvStepcounter.text = getString(R.string.tv_stepCounter,((event.values[0].toInt() - stepCmptMax)))
+        tvStepcounter.text =
+            getString(R.string.tv_stepCounter, ((event.values[0].toInt() - stepCmptMax)))
     }
 
     /**

@@ -10,7 +10,7 @@ import androidx.fragment.app.DialogFragment
  * @author Joseph Duquet
  * @author Ennlys Granger-Corbeil
  */
-class CongratFragment: DialogFragment() {
+class CongratFragment : DialogFragment() {
 
     /**
      * permet de crée une nouvelle instance d'un dialogFragment
@@ -18,7 +18,7 @@ class CongratFragment: DialogFragment() {
      * @param time le temps mesuré du rally
      * @param steps les pas mesuré du rally
      */
-    fun newInstance(time: String, steps: Int): CongratFragment{
+    fun newInstance(time: String, steps: Int): CongratFragment {
         val f = CongratFragment()
         val args = Bundle()
         args.putString(CongratFragment.time, time)

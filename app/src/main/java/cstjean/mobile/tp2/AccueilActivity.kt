@@ -40,7 +40,6 @@ class AccueilActivity : AppCompatActivity() {
             }
         }
 
-
     /**
      *  Creation de la vue. Permet d'Afficher à l'utilisateur l'autorisation de la localisation
      *  @param savedInstanceState l'instance de sauvegarde
@@ -85,22 +84,29 @@ class AccueilActivity : AppCompatActivity() {
     private fun afficheDialogLocalisation() {
         val dialog = android.app.AlertDialog.Builder(this)
             .setTitle("Explication de la permission")
-            .setMessage("Votre localisation est utilisée pour poursuivre votre progression dans le" +
-                    " rally, sans votre accord, le rally ne peut vous suivre et l'accès au rally est impossible.")
-            .setPositiveButton("Ok") { _,_ ->
-                requestPermissionLauncher.launch(arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION))
+            .setMessage(
+                "Votre localisation est utilisée pour poursuivre votre progression dans le" +
+                        " rally, sans votre accord, le rally ne peut vous suivre et l'accès au rally est impossible."
+            )
+            .setPositiveButton("Ok") { _, _ ->
+                requestPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
 
-                if (ContextCompat.checkSelfPermission(this,
+                if (ContextCompat.checkSelfPermission(
+                        this,
                         Manifest.permission.ACCESS_FINE_LOCATION
                     ) == PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_COARSE_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED) startActivity(Intent(this, RallyActivity::class.java))
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) startActivity(Intent(this, RallyActivity::class.java))
             }
-            .setNegativeButton("fermer l'application") {_,_ ->
+            .setNegativeButton("fermer l'application") { _, _ ->
                 finish()
             }
             .show()

@@ -10,6 +10,8 @@ package cstjean.mobile.tp2
  * @author Joseph Duquet
  * @author Ennlys Granger-Corbeil
  */
-data class Coordonees(val latitude: Double,
-                      val longitude : Double,
-                      var visite : Boolean = false)
+data class Coordonees(
+    val latitude: Double,
+    val longitude: Double,
+    var visite: Boolean = false
+)
