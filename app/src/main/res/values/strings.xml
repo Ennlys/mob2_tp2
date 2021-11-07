@@ -7,4 +7,5 @@
     <!--LINT: Pas besoin de formatter en cas de pluriel-->
     <string name="congrats">Bravo! Vous avez atteint tous les objectifs en %1$s avec %2$d pas!</string>
     <string name="another_rally">Un autre rally?</string>
+    <string name="btn_retourMenu">retour au menu principal</string>
 </resources>

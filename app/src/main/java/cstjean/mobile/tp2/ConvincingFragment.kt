@@ -10,8 +10,35 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 
+/**
+ * A SUPPRIMER PUISQUE IL A UNE METHODE dans ACCUEILACTIVITY QUI S'EN OCCUPE
+ * @property requestPermissionLauncher
+ *
+ * @author Joseph Duquet
+ * @author Ennlys Granger-Corbeil
+ */
 class ConvincingFragment: DialogFragment() {
 
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            when {
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
+                    startActivity(Intent(requireContext(), RallyActivity::class.java))
+                }
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
+                    startActivity(Intent(requireContext(), RallyActivity::class.java))
+                }
+                else -> {
+                }
+            }
+        }
+
+    /**
+     *
+     */
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = AlertDialog.Builder(requireActivity())
             .setTitle("Explication de la permission")
@@ -30,28 +57,12 @@ class ConvincingFragment: DialogFragment() {
                             Manifest.permission.ACCESS_COARSE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED) startActivity(Intent(requireActivity(), RallyActivity::class.java))
             }
-            .setNegativeButton("Nope") {_,_ ->}
+            .setNegativeButton("Non") {_,_ ->}
             .show()
 
         dialog.setCanceledOnTouchOutside(false)
         return dialog
     }
-
-    private val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            when {
-                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
-                    startActivity(Intent(requireContext(), RallyActivity::class.java))
-                }
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
-                    startActivity(Intent(requireContext(), RallyActivity::class.java))
-                }
-                else -> {
-                }
-            }
-        }
 
     companion object {
         const val TAG = "ConvinceRunnerDialog"
