@@ -25,7 +25,6 @@ class AccueilActivity : AppCompatActivity() {
                     startActivity(Intent(this, RallyActivity::class.java))
                 }
                 else -> {
-                    ConvincingFragment().show(supportFragmentManager, ConvincingFragment.TAG)
                 }
             }
         }
@@ -45,12 +44,11 @@ class AccueilActivity : AppCompatActivity() {
                         ContextCompat.checkSelfPermission(
                             this,
                             Manifest.permission.ACCESS_COARSE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED ->
-                {
+                        ) == PackageManager.PERMISSION_GRANTED -> {
                     startActivity(Intent(this, RallyActivity::class.java))
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                    btnDemarrer.text = "Lol"
+                    ConvincingFragment().show(supportFragmentManager, ConvincingFragment.TAG)
                 }
                 else -> {
                     requestPermissionLauncher.launch(arrayOf(

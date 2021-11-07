@@ -14,34 +14,41 @@ class ConvincingFragment: DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = AlertDialog.Builder(requireActivity())
+            .setTitle("Explication de la permission")
             .setMessage("Votre localisation est utilisée pour poursuivre votre progression dans le" +
                     " rally, sans votre accord, le rally ne peut vous suivre et l'accès au rally est impossible.")
-            .setPositiveButton("2e chance") { _, _ ->
-                requestPermissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    )
-                )
+            .setPositiveButton("Ok") { _,_ ->
+                requestPermissionLauncher.launch(arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION))
+
+                if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED ||
+                        ContextCompat.checkSelfPermission(
+                            requireContext(),
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED) startActivity(Intent(requireActivity(), RallyActivity::class.java))
             }
-            .setNegativeButton("Nope") {_,_ ->
-            }
+            .setNegativeButton("Nope") {_,_ ->}
             .show()
+
         dialog.setCanceledOnTouchOutside(false)
         return dialog
     }
 
-    /**La boîte de dialogue qui demande la permission et enregistre la réponse de l'utilisateur*/
     private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
             when {
-                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                    startActivity(Intent(requireContext(), AccueilActivity::class.java))
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true -> {
+                    startActivity(Intent(requireContext(), RallyActivity::class.java))
                 }
-                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                    startActivity(Intent(requireContext(), AccueilActivity::class.java))
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true -> {
+                    startActivity(Intent(requireContext(), RallyActivity::class.java))
+                }
+                else -> {
                 }
             }
         }
