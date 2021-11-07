@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -20,16 +19,13 @@ class AccueilActivity : AppCompatActivity() {
         ) { permissions ->
             when {
                 permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                    Log.d("track", "isGranted - FINE")
+                    startActivity(Intent(this, RallyActivity::class.java))
                 }
                 permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                    Log.d("track", "isGranted - COARSE")
+                    startActivity(Intent(this, RallyActivity::class.java))
                 }
                 else -> {
-                    // TODO
-                    // Expliquer à l'usager que la fonctionnalité n'est pas disponible car elle
-                    // nécessite une permission qui a été refusée.
-                    Log.d("track", "notGranted")
+                    ConvincingFragment().show(supportFragmentManager, ConvincingFragment.TAG)
                 }
             }
         }
@@ -51,11 +47,10 @@ class AccueilActivity : AppCompatActivity() {
                             Manifest.permission.ACCESS_COARSE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED ->
                 {
-                    val intent = Intent(this, RallyActivity::class.java)
-                    startActivity(intent)
+                    startActivity(Intent(this, RallyActivity::class.java))
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                    // TODO expliquer pourquoi necessaire
+                    btnDemarrer.text = "Lol"
                 }
                 else -> {
                     requestPermissionLauncher.launch(arrayOf(

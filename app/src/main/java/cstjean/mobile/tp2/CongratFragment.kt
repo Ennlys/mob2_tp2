@@ -21,13 +21,15 @@ class CongratFragment: DialogFragment() {
         val time = requireArguments().getString(time)
         val steps = requireArguments().getInt(steps)
 
-        return AlertDialog.Builder(requireActivity())
+        val dialog = AlertDialog.Builder(requireActivity())
             .setTitle("Félicitation!")
             .setMessage(getString(R.string.congrats, time, steps))
             .setPositiveButton(R.string.another_rally) { _, _ ->
                 startActivity(Intent(requireContext(), RallyActivity::class.java))
             }
             .show()
+        dialog.setCanceledOnTouchOutside(false)
+        return dialog
     }
 
     companion object {
